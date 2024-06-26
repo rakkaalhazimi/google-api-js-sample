@@ -9,7 +9,6 @@ let auth = JSON.parse(buffer.toString());
 const app = e();
 const port = 3000;
 const GOOGLE_OAUTH_URL = 'https://oauth2.googleapis.com/token';
-const encryptor = new Encryptor({ key: auth.GOOGLE_REFRESH_TOKEN_ENCRYPTION_KEY });
 
 
 
@@ -40,10 +39,7 @@ app.get('/api/auth/callback/google', async (req, res) => {
   let buffer = fs.readFileSync('auth.json');
   let bufferJson = JSON.parse(buffer.toString());
   
-  let encryptedToken = encryptor.encrypt(authJson.refresh_token);
-  
   bufferJson.GOOGLE_REFRESH_TOKEN = authJson.refresh_token;
-  bufferJson.GOOGLE_REFRESH_TOKEN_ENCRYPTED = encryptedToken;
   fs.writeFileSync('auth.json', JSON.stringify(bufferJson, null, '\n'));
   
   console.log('Auth json: ', authJson);
