@@ -2,7 +2,8 @@ const GOOGLE_AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth/oauthchoos
 const scopes = [
   'https://www.googleapis.com/auth/calendar',
   'https://www.googleapis.com/auth/userinfo.email',
-  'https://www.googleapis.com/auth/drive.file'
+  'https://www.googleapis.com/auth/drive.file',
+  'https://www.googleapis.com/auth/meetings.space.created'
 ]
 const scope = scopes.join(' ');
 
