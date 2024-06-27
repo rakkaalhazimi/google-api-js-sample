@@ -21,67 +21,95 @@ async function main() {
   });
   
   // Get events
-  try {
-    let events = await googleCalendar.events.list({
-      calendarId: 'primary',
-      // timeMin: new Date().toISOString(),
-      maxResults: 10,
-      timeMin: '2024-06-18T17:00:00Z',
-      timeMax: '2024-06-19T16:59:00Z',
-      singleEvents: true,
-      showDeleted: true,
-      orderBy: 'startTime',
-    })
-    console.log(events.data.items.length);
-    for (let item of events.data.items) {
-      console.log(item);
-    }
-  } catch(error) {
-    if (error instanceof GaxiosError) {
-      console.error(error.response.data)
+  async function getEvents(start, end) {
+    try {
+      let events = await googleCalendar.events.list({
+        calendarId: 'primary',
+        // timeMin: new Date().toISOString(),
+        maxResults: 10,
+        timeMin: start,
+        timeMax: end,
+        singleEvents: true,
+        showDeleted: true,
+        orderBy: 'startTime',
+      })
+      console.log(events.data.items.length);
+      for (let item of events.data.items) {
+        console.log(item);
+      }
+    } catch(error) {
+      if (error instanceof GaxiosError) {
+        console.error(error.response.data);
+      }
     }
   }
   
   // Get calendars
-  // let calendars = await googleCalendar.calendarList.list({
-  //   maxResults: 10
-  // });
-  // console.log(calendars.data.items);
+  async function getCalendar() {
+    let calendars = await googleCalendar.calendarList.list({
+      maxResults: 10
+    });
+    console.log(calendars.data.items);
+  }
   
   // Insert event
-  // const calendarEvent = {
-  //   summary: "Test Event added by Node.js",
-  //   description: "This event was created by Node.js",
-  //   start: {
-  //     dateTime: "2024-06-19T14:10:00-02:00",
-  //     timeZone: "Asia/Jakarta",
-  //   },
-  //   end: {
-  //     dateTime: "2024-06-19T14:30:00-02:00",
-  //     timeZone: "Asia/Jakarta",
-  //   },
-  //   attendees: [
-  //     {email: "rakkakeren@gmail.com"}, 
-  //     {email: "tenyom@gmail.com"}
-  //   ],
-  //   reminders: {
-  //     useDefault: false,
-  //     overrides: [
-  //       // { method: "email", minutes: 24 * 60 },
-  //       // { method: "popup", minutes: 10 },
-  //     ],
-  //   },
-  //   extendedProperties: {
-  //     shared: {name: "rakka"}
-  //   }
-  // };
+  async function createEvent() {
+    const calendarEvent = {
+      summary: "Test Event added by Node.js",
+      description: "This event was created by Node.js",
+      start: {
+        dateTime: "2024-06-27T00:00:00Z",
+        timeZone: "Asia/Jakarta",
+      },
+      end: {
+        dateTime: "2024-06-27T01:00:00Z",
+        timeZone: "Asia/Jakarta",
+      },
+      attendees: [
+        {email: "rakkakeren@gmail.com"}, 
+        {email: "tenyom@gmail.com"}
+      ],
+      recurrence: ["RRULE:FREQ=WEEKLY"],
+      reminders: {
+        useDefault: false,
+        overrides: [
+          // { method: "email", minutes: 24 * 60 },
+          // { method: "popup", minutes: 10 },
+        ],
+      },
+      conferenceData: {
+        createRequest: {
+          requestId: auth.SECRET,
+          conferenceSolutionKey: {type: 'hangoutsMeet'}},
+      },
+      extendedProperties: {
+        shared: {name: "rakka"}
+      }
+    };
+    
+    let result = await googleCalendar.events.insert({
+      calendarId: 'primary',
+      conferenceDataVersion: 1,
+      resource: calendarEvent 
+    });
+    
+    console.log(result);
+  }
   
-  // let result = await googleCalendar.events.insert({
-  //   calendarId: 'primary',
-  //   resource: calendarEvent   
-  // })
+  // Delete event
+  async function deleteEvent(eventId) {
+    let result = await googleCalendar.events.delete({
+      calendarId: 'primary',
+      eventId: eventId
+    });
+    console.log(result);
+    return result;
+  }
   
-  // console.log(result);
+  // Your code
+  // await getEvents('2024-06-27T00:00:00Z', '2024-06-28T00:00:00Z');
+  // await createEvent();
+  // await deleteEvent('ae9smettqcqj2kthj1ppb20hak');
     
 }
 
