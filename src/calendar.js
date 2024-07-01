@@ -20,8 +20,8 @@ async function main() {
     }),
   });
   
-  // Get events
-  async function getEvents(start, end) {
+  // List events
+  async function listEvents(start, end) {
     try {
       let events = await googleCalendar.events.list({
         calendarId: 'primary',
@@ -37,6 +37,24 @@ async function main() {
       for (let item of events.data.items) {
         console.log(item);
       }
+    } catch(error) {
+      if (error instanceof GaxiosError) {
+        console.error(error.response.data);
+      }
+    }
+  }
+  
+  // Get event
+  async function getEvents(eventId) {
+    try {
+      let events = await googleCalendar.events.get({
+        calendarId: 'primary',
+        eventId: eventId
+      })
+      console.log(events.data);
+      // for (let item of events.data.items) {
+        // console.log(item);
+      // }
     } catch(error) {
       if (error instanceof GaxiosError) {
         console.error(error.response.data);
@@ -107,9 +125,10 @@ async function main() {
   }
   
   // Your code
-  // await getEvents('2024-06-27T00:00:00Z', '2024-06-28T00:00:00Z');
+  // await listEvents('2024-06-28T00:00:00Z', '2024-06-29T00:00:00Z');
   // await createEvent();
   // await deleteEvent('ae9smettqcqj2kthj1ppb20hak');
+  // await getEvents('<event-id>');
     
 }
 
