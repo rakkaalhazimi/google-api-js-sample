@@ -1,6 +1,6 @@
 import { google } from 'googleapis';
 import * as fs from 'fs';
-import {GaxiosError} from 'gaxios'
+import { GaxiosError } from 'gaxios'
 
 
 
@@ -9,7 +9,7 @@ let buffer = fs.readFileSync('auth.json');
 let auth = JSON.parse(buffer.toString());
 
 async function main() {
-  
+
   const googleCalendar = google.calendar({
     version: 'v3',
     auth: google.auth.fromJSON({
@@ -19,7 +19,7 @@ async function main() {
       client_secret: auth.GOOGLE_CLIENT_SECRET,
     }),
   });
-  
+
   // List events
   async function listEvents(start, end) {
     try {
@@ -37,31 +37,43 @@ async function main() {
       for (let item of events.data.items) {
         console.log(item);
       }
-    } catch(error) {
+    } catch (error) {
       if (error instanceof GaxiosError) {
         console.error(error.response.data);
       }
     }
   }
-  
+
   // Get event
   async function getEvents(eventId) {
     try {
       let events = await googleCalendar.events.get({
         calendarId: 'primary',
-        eventId: eventId
+        eventId: eventId,
       })
       console.log(events.data);
+      let recurrent_rule = events.data.recurrence.length ? events.data.recurrence[0] : null;
+      console.log(recurrent_rule);
       // for (let item of events.data.items) {
-        // console.log(item);
+      // console.log(item);
       // }
-    } catch(error) {
+    } catch (error) {
       if (error instanceof GaxiosError) {
         console.error(error.response.data);
       }
     }
   }
-  
+
+  // Get Instance Events
+  async function getInstanceEvents(recurringId, start) {
+    let events = await googleCalendar.events.instances({
+      calendarId: 'primary',
+      eventId: recurringId,
+      timeMin: start
+    });
+    console.log(events);
+  }
+
   // Get calendars
   async function getCalendar() {
     let calendars = await googleCalendar.calendarList.list({
@@ -69,25 +81,25 @@ async function main() {
     });
     console.log(calendars.data.items);
   }
-  
+
   // Insert event
-  async function createEvent() {
+  async function createEvent(start, end, timezone, meetingCode = null) {
     const calendarEvent = {
       summary: "Test Event added by Node.js",
       description: "This event was created by Node.js",
       start: {
-        dateTime: "2024-06-27T00:00:00Z",
-        timeZone: "Asia/Jakarta",
+        dateTime: start,
+        timeZone: timezone,
       },
       end: {
-        dateTime: "2024-06-27T01:00:00Z",
-        timeZone: "Asia/Jakarta",
+        dateTime: end,
+        timeZone: timezone,
       },
       attendees: [
-        {email: "rakkakeren@gmail.com"}, 
-        {email: "tenyom@gmail.com"}
+        { email: "rakkakeren@gmail.com" },
+        { email: "tenyom@gmail.com" }
       ],
-      recurrence: ["RRULE:FREQ=WEEKLY"],
+      // recurrence: ["RRULE:FREQ=WEEKLY"],
       reminders: {
         useDefault: false,
         overrides: [
@@ -95,25 +107,51 @@ async function main() {
           // { method: "popup", minutes: 10 },
         ],
       },
-      conferenceData: {
-        createRequest: {
-          requestId: auth.SECRET,
-          conferenceSolutionKey: {type: 'hangoutsMeet'}},
-      },
+
       extendedProperties: {
-        shared: {name: "rakka"}
+        shared: { name: "rakka" }
       }
     };
     
+    // Use existing meeting
+    // ref: https://stackoverflow.com/questions/75785196/create-a-google-calendar-event-with-a-specified-google-meet-id-conferencedata-c
+    if (meetingCode) {
+      calendarEvent.conferenceData = {
+        conferenceId: meetingCode,
+        entryPoints: [
+          {
+            entryPointType: "video",
+            label: `meet.google.com/${meetingCode}`,
+            uri: `https://meet.google.com/${meetingCode}`
+          }
+        ],
+        conferenceSolution: {
+          key: {
+            type: "hangoutsMeet"
+          }
+        }
+      }
+    }
+    
+    // Generate meeting link on fly
+    else {
+      calendarEvent.conferenceData = {
+        createRequest: {
+          requestId: auth.SECRET,
+          conferenceSolutionKey: { type: 'hangoutsMeet' },
+        },
+      }
+    }
+
     let result = await googleCalendar.events.insert({
       calendarId: 'primary',
       conferenceDataVersion: 1,
-      resource: calendarEvent 
+      resource: calendarEvent
     });
-    
+
     console.log(result);
   }
-  
+
   // Delete event
   async function deleteEvent(eventId) {
     let result = await googleCalendar.events.delete({
@@ -123,13 +161,15 @@ async function main() {
     console.log(result);
     return result;
   }
-  
+
   // Your code
-  // await listEvents('2024-06-28T00:00:00Z', '2024-06-29T00:00:00Z');
-  // await createEvent();
+  // await listEvents('2024-07-15T00:00:00Z', '2024-07-16T00:00:00Z');
+  // await createEvent('2024-07-16T00:00:00Z', '2024-07-16T01:00:00Z', 'Asia/Jakarta', 'vrq-ibgo-xbn');
   // await deleteEvent('ae9smettqcqj2kthj1ppb20hak');
-  // await getEvents('<event-id>');
-    
+  // await getEvents('3c6feep8mkgejdbcvd2tr7gh3c_R20240109T010000');
+  // await getEvents('3c6feep8mkgejdbcvd2tr7gh3c_20240710T010000Z');
+  // await getInstanceEvents('3c6feep8mkgejdbcvd2tr7gh3c_R20240109T010000');
+
 }
 
 main();
