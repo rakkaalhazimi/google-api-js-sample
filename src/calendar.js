@@ -30,7 +30,7 @@ async function main() {
         timeMin: start,
         timeMax: end,
         singleEvents: true,
-        showDeleted: true,
+        showDeleted: false,
         orderBy: 'startTime',
       })
       console.log(events.data.items.length);
