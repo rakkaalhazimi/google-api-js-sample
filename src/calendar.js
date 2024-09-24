@@ -146,8 +146,11 @@ async function main() {
     let result = await googleCalendar.events.insert({
       calendarId: 'primary',
       conferenceDataVersion: 1,
-      resource: calendarEvent
-    });
+      resource: calendarEvent,
+      // Send invitation email to guests
+      // sendUpdates: "all"
+    },
+  );
 
     console.log(result);
   }
