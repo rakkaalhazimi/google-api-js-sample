@@ -12,14 +12,26 @@ let auth = JSON.parse(buffer.toString());
 
 async function main() {
   
-  let drive = google.drive({
+  const scopes = ["https://www.googleapis.com/auth/drive.metadata.readonly"];
+  
+  // let drive = google.drive({
+  //   version: "v3",
+  //   auth: google.auth.fromJSON({
+  //     type: 'authorized_user',
+  //     refresh_token: auth.GOOGLE_REFRESH_TOKEN,
+  //     client_id: auth.GOOGLE_CLIENT_ID,
+  //     client_secret: auth.GOOGLE_CLIENT_SECRET,
+  //   }) 
+  // });
+  
+  const drive = google.drive({
     version: "v3",
-    auth: google.auth.fromJSON({
-      type: 'authorized_user',
-      refresh_token: auth.GOOGLE_REFRESH_TOKEN,
-      client_id: auth.GOOGLE_CLIENT_ID,
-      client_secret: auth.GOOGLE_CLIENT_SECRET,
-    }) 
+    
+    auth: new google.auth.GoogleAuth({
+      keyFile: 'service.account.security.json',
+      scopes: scopes
+    })
+    
   });
   
   // List files
@@ -118,6 +130,17 @@ async function main() {
         let fileId = await createFile(filePath, currentFolderId);
       }
     }
+  }
+  
+  async function getPermission(fileId) {
+    
+    let permissions = await drive.permissions.list({
+      fileId: fileId
+    });
+    
+    console.log(permissions);
+    
+    return permissions;
   }
   
   // Your code here
