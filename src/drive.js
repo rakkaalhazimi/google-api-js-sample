@@ -143,6 +143,27 @@ async function main() {
     return permissions;
   }
   
+  async function getFileSize(fileId) {
+    try {
+      // let response = await drive.files.get({fileId: fileId, fields: 'size'});
+      let response = await drive.files.get({fileId: fileId, fields: 'size,kind,id,name,mimeType,capabilities'});
+      console.log(response.data);
+      const fileSize = parseInt(response.data?.size ?? 0) / (1024 * 1024 * 1024);
+      console.log(fileSize);
+    } catch (error) {
+      console.log(error);
+      console.log(error.status);
+      console.log(error.message);
+    }
+    
+    // if (response.result && response.result.size) {
+    //   return parseInt(response.result.size); // Parse the size to an integer
+    // } else {
+    //   console.warn('File size not found for file ID:', fileId);
+    //   return null;
+    // }
+  }
+  
   // Your code here
   //
   
