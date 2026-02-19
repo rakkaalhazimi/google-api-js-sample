@@ -1,5 +1,6 @@
 import e from "express";
 import fs from "fs";
+import cors from 'cors';
 import { Encryptor } from 'strong-cryptor';
 
 
@@ -11,11 +12,19 @@ const port = 3000;
 const GOOGLE_OAUTH_URL = 'https://oauth2.googleapis.com/token';
 
 
+// Allow requests from Vite dev server (http://localhost:5173)
+app.use(cors({
+  origin: 'http://localhost:5173',
+}));
+
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
 })
 
+app.get('/api/client-id', (req, res) => {
+  res.send(auth.GOOGLE_CLIENT_ID);
+})
 
 app.get('/api/auth/callback/google', async (req, res) => {
   console.log('From google auth callback');
