@@ -164,6 +164,32 @@ async function main() {
     // }
   }
   
+  
+  async function getFileDuration(fileId) {
+    try {
+      let response = await drive.files.get({fileId: fileId, fields: 'size,kind,id,name,mimeType,capabilities,videoMediaMetadata'});
+      console.log(response.data);
+      
+      const durationMillis = response.data?.videoMediaMetadata?.durationMillis;
+    
+      if (durationMillis) {
+        const totalSeconds = parseInt(durationMillis) / 1000;
+        console.log(`Duration in seconds: ${totalSeconds}s`);
+        
+        // Optional: Format it to HH:MM:SS
+        const formattedDuration = new Date(totalSeconds * 1000).toISOString().substr(11, 8);
+        console.log(`Formatted Duration: ${formattedDuration}`);
+      } else {
+        console.log("This file type doesn't have duration metadata (e.g., it's not a video/audio file or still processing).");
+      }
+      
+    } catch (error) {
+      console.log(error);
+      console.log(error.status);
+      console.log(error.message);
+    }
+  }
+  
   // Your code here
   //
   
@@ -180,6 +206,14 @@ async function main() {
   
   // findRootFile();
   
+  // Get link permissions
+  // let linkPrivate = https://drive.google.com/file/d/1CKjTPYIv1S6ym4iVAWzyOYOPLSqUxq05/view?usp=sharing
+  // let link = "https://drive.google.com/file/d/1aUbpVXy8y4Rys7iVQhAtSKDPc79jNZBl/view?usp=sharing";
+  // getPermission('1AoNaT8zOuzA5F2vxqy64twydTCF5TQoP');
+  // getPermission('1aUbpVXy8y4Rys7iVQhAtSKDPc79jNZBl');
+  // getFileSize('1aUbpVXy8y4Rys7iVQhAtSKDPc79jNZBl');
+  getFileDuration('1UETiBCQ0n0bDcX2pKElckcdjS1xahWZ3');
+  // getFileSize('1CKjTPYIv1S6ym4iVAWzyOYOPLSqUxq05');
   
   
 }
